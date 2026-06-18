@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>index</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --border: #e3e1da;
+    --border-strong: #c9c6bc;
+    --text: #1f1e1b;
+    --text-secondary: #6b6a64;
+    --text-tertiary: #9a988f;
+    --info-bg: #e6f1fb;
+    --info-text: #0c447c;
+    --info-border: #85b7eb;
+    --success-bg: #eaf3de;
+    --success-text: #27500a;
+    --warning-bg: #faeeda;
+    --warning-text: #633806;
+    --danger-bg: #fcebeb;
+    --danger-text: #791f1f;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  #app-root {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  h1, h2, h3 { font-weight: 500; margin: 0; }
+  h1 { font-size: 22px; }
+  h2 { font-size: 18px; }
+  h3 { font-size: 16px; }
+  p { margin: 0; }
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+  }
+  button:hover { background: var(--bg); }
+  button.primary {
+    background: var(--info-bg);
+    color: var(--info-text);
+    border-color: var(--info-border);
+    font-weight: 500;
+  }
+  input, select {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    width: 100%;
+  }
+  input:focus, select:focus { outline: 2px solid var(--info-border); }
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border);
+    padding: 1rem 1.25rem;
+  }
+  .row-flex {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+<div id="app-root"></div>
+
+<script>
+/* ====== DONNEES COMPETENCES COre (193 ressources) ====== */
+const RESOURCES = [{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement","text":"Identifier et décrire les dangers au poste de travail","id":"r1"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement","text":"Décrire et respecter les principales consignes relatives à la sécurité au travail applicables dans l'entreprise","id":"r2"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement","text":"Interpréter correctement les symboles de mise en garde de l'entreprise et se comporter en conséquence","id":"r3"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement","text":"Utiliser l'équipement de protection individuelle","id":"r4"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement","text":"Utiliser en toute sécurité les moyens de levage et de transport de l'entreprise","id":"r5"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement","text":"Connaître le comportement à adopter en cas d'accident et d'incendie","id":"r6"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement","text":"Savoir effectuer les gestes de premiers secours en cas d'urgence","id":"r7"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement","text":"Equiper son poste de travail de manière correcte et judicieuse sur le plan ergonomique","id":"r8"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement","text":"Utiliser et éliminer correctement les matières dangereuses pour la santé présentes dans l'entreprise","id":"r9"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.2","subTitle":"Organisation du travail et processus de travail","text":"Aménager son poste de travail de manière appropriée et le maintenir ordonné","id":"r10"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.2","subTitle":"Organisation du travail et processus de travail","text":"Être familiarisé avec l'organisation de l'entreprise et les processus de travail de son propre domaine d'activités","id":"r11"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.2","subTitle":"Organisation du travail et processus de travail","text":"Comprendre et utiliser les documents de travail","id":"r12"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.2","subTitle":"Organisation du travail et processus de travail","text":"Effectuer des contrôles selon instructions","id":"r13"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.2","subTitle":"Organisation du travail et processus de travail","text":"Remplir les documents de travail","id":"r14"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.3","subTitle":"Matériaux, matières de fabrication et matières auxiliaires","text":"Décrire les propriétés d'usinage des matériaux utilisés dans l'entreprise et citer des applications","id":"r15"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.3","subTitle":"Matériaux, matières de fabrication et matières auxiliaires","text":"Différencier les matériaux et les préparer selon instructions (p.ex. nomenclatures)","id":"r16"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.3","subTitle":"Matériaux, matières de fabrication et matières auxiliaires","text":"Différencier les liquides de refroidissement et les lubrifiants et citer leur application","id":"r17"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.3","subTitle":"Matériaux, matières de fabrication et matières auxiliaires","text":"Utiliser et éliminer de façon écologique et selon instructions les consommables, les matériaux et les matières auxiliaires","id":"r18"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.4","subTitle":"Aptitudes manuelles de base","text":"Lire et utiliser des documents de fabrication tels qu'ordres d'usinage, dessins et nomenclatures","id":"r19"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.4","subTitle":"Aptitudes manuelles de base","text":"Désigner et choisir des outils à main et des moyens auxiliaires pour tracer, pointer, marquer, plier, scier, limer, ébavurer, percer, chanfreiner et fileter/tarauder","id":"r20"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.4","subTitle":"Aptitudes manuelles de base","text":"Décrire des machines tenues à la main, leurs accessoires et leurs possibilités d'utilisation","id":"r21"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.4","subTitle":"Aptitudes manuelles de base","text":"Déterminer les vitesses de coupe à l'aide de tableaux","id":"r22"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.4","subTitle":"Aptitudes manuelles de base","text":"Tracer, pointer et marquer des pièces","id":"r23"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.4","subTitle":"Aptitudes manuelles de base","text":"Scier de longueur des pièces selon traçage","id":"r24"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.4","subTitle":"Aptitudes manuelles de base","text":"Limer des rayons et des chanfreins","id":"r25"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.4","subTitle":"Aptitudes manuelles de base","text":"Ebavurer des pièces","id":"r26"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.4","subTitle":"Aptitudes manuelles de base","text":"Préparer les outils à l'aide d'une liste d'outils","id":"r27"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.4","subTitle":"Aptitudes manuelles de base","text":"Evaluer l'état et l'usure des outils","id":"r28"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.4","subTitle":"Aptitudes manuelles de base","text":"Entretenir des outils","id":"r29"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.5","subTitle":"Perçage","text":"Décrire les principaux composants d'une perceuse","id":"r30"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.5","subTitle":"Perçage","text":"Nettoyer et entretenir une perceuse","id":"r31"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.5","subTitle":"Perçage","text":"Utiliser correctement les moyens de serrage","id":"r32"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.5","subTitle":"Perçage","text":"Percer, aléser et chanfreiner des trous de passage et des trous borgnes","id":"r33"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.6","subTitle":"Filetage","text":"Différencier les types de filetage et la normalisation des filetages","id":"r34"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.6","subTitle":"Filetage","text":"Fileter avec une filière","id":"r35"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.6","subTitle":"Filetage","text":"Contrôler le filetage avec un tampon à tolérance","id":"r36"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.7","subTitle":"Assemblages à vis","text":"Désigner les assemblages à vis et les dispositifs d'arrêt et décrire leurs applications","id":"r37"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.7","subTitle":"Assemblages à vis","text":"Différencier les outils et les moyens auxiliaires pour la réalisation d'assemblages à vis","id":"r38"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.7","subTitle":"Assemblages à vis","text":"Visser des éléments de construction et les assurer contre le desserrage","id":"r39"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.8","subTitle":"Traitement de surface et protection contre la corrosion","text":"Appliquer la protection contre la corrosion utilisée dans l'entreprise","id":"r40"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.9","subTitle":"Mesure et contrôle","text":"Désigner les pieds à coulisse et les jauges limites et expliquer leur utilisation","id":"r41"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.9","subTitle":"Mesure et contrôle","text":"Relever correctement les valeurs en utilisant le principe du vernier","id":"r42"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.9","subTitle":"Mesure et contrôle","text":"Utiliser les moyens de mesure et de contrôle en tenant compte de la précision","id":"r43"},{"domain":"base","domainLabel":"Formation de base (b.1)","subId":"MPB1.9","subTitle":"Mesure et contrôle","text":"Documenter les résultats de mesure et de contrôle","id":"r44"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.1","subTitle":"Appliquer les mesures de la sécurité au travail","text":"Identifier et décrire les dangers sur le lieu de travail","id":"r45"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.1","subTitle":"Appliquer les mesures de la sécurité au travail","text":"Utiliser l'équipement de protection individuelle","id":"r46"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.1","subTitle":"Appliquer les mesures de la sécurité au travail","text":"Utiliser en toute sécurité les moyens de levage et de transport de l'entreprise","id":"r47"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.2","subTitle":"Choisir et préparer l'outillage","text":"Désigner les outils de fraisage pour les différentes applications et les différents matériaux","id":"r48"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.2","subTitle":"Choisir et préparer l'outillage","text":"Désigner la géométrie des tranchants d'outils de fraisage","id":"r49"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.2","subTitle":"Choisir et préparer l'outillage","text":"Evaluer l'état et l'usure d'outils de fraisage","id":"r50"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.2","subTitle":"Choisir et préparer l'outillage","text":"Utiliser les moyens de serrage prescrits pour les outils de fraisage","id":"r51"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.3","subTitle":"Désigner les machines-outils","text":"Décrire la conception d'une machine-outil, désigner ses groupes fonctionnels et expliquer leur fonction","id":"r52"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.4","subTitle":"Préparer la machine en vue de son utilisation","text":"Equiper la fraiseuse et préparer le poste de travail","id":"r53"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.4","subTitle":"Préparer la machine en vue de son utilisation","text":"Contrôler les dispositifs de protection de la fraiseuse","id":"r54"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.5","subTitle":"Déterminer et régler les données technologiques pour l'usinage par enlèvement de matière","text":"Déterminer à l'aide de tableaux et selon instructions les vitesses de coupe, avances et profondeurs de coupe et les régler sur la machine-outil","id":"r55"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.6","subTitle":"Monter les pièces à usiner","text":"Monter les moyens de serrage pour la fixation des outils","id":"r56"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.6","subTitle":"Monter les pièces à usiner","text":"Aligner et serrer les pièces à usiner","id":"r57"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.7","subTitle":"Fixer les outils","text":"Choisir et fixer les outils en tenant compte des matériaux et du procédé d'usinage","id":"r58"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.8","subTitle":"Usiner des surfaces planes avec des machines-outils conventionnelles","text":"Fraiser en roulant et fraiser en bout","id":"r59"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.8","subTitle":"Usiner des surfaces planes avec des machines-outils conventionnelles","text":"Fraiser des poches, des épaulements et des rainures","id":"r60"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.8","subTitle":"Usiner des surfaces planes avec des machines-outils conventionnelles","text":"Fraiser des surfaces planes, parallèles et perpendiculaires (Ra 3,2 / DIN ISO 2768 m)","id":"r61"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.8","subTitle":"Usiner des surfaces planes avec des machines-outils conventionnelles","text":"Fraiser des surfaces planes, parallèles et perpendiculaires (Ra 1,6 / DIN ISO 2768 m)","id":"r62"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.8","subTitle":"Usiner des surfaces planes avec des machines-outils conventionnelles","text":"Fraiser des pièces avec tolérance fondamentale jusqu'à IT 9","id":"r63"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.8","subTitle":"Usiner des surfaces planes avec des machines-outils conventionnelles","text":"Fraiser des pièces avec tolérance fondamentale jusqu'à IT 8","id":"r64"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.9","subTitle":"Utiliser les moyens de mesure et de contrôle, documenter les résultats","text":"Désigner les moyens de mesure et de contrôle tels que pied à coulisse, micromètre","id":"r65"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.9","subTitle":"Utiliser les moyens de mesure et de contrôle, documenter les résultats","text":"Contrôler et utiliser les moyens de mesure et de contrôle","id":"r66"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.9","subTitle":"Utiliser les moyens de mesure et de contrôle, documenter les résultats","text":"Contrôler les tolérancements géométriques tels que planéité, parallélisme et perpendicularité","id":"r67"},{"domain":"cie","domainLabel":"CIE Fraisage (MPS2)","subId":"MPS2.9","subTitle":"Utiliser les moyens de mesure et de contrôle, documenter les résultats","text":"Remplir les protocoles de mesure et de contrôle prescrits","id":"r68"},{"domain":"compl","domainLabel":"Formation complémentaire","subId":"MPE1.1","subTitle":"Technologies et connaissances des produits spécifiques à l'entreprise (c.1)","text":"Ressources définies librement par l'entreprise formatrice selon ses besoins spécifiques (processus internes, produits, machines propres)","id":"r69"},{"domain":"compl","domainLabel":"Formation complémentaire","subId":"MPE2.1","subTitle":"Usiner des pièces sur machines-outils à commande numérique selon instructions (c.2)","text":"Enclencher et déclencher correctement des machines CNC","id":"r70"},{"domain":"compl","domainLabel":"Formation complémentaire","subId":"MPE2.1","subTitle":"Usiner des pièces sur machines-outils à commande numérique selon instructions (c.2)","text":"Préparer les machines CNC en vue de leur utilisation (démarrer la machine, accoster les points de référence)","id":"r71"},{"domain":"compl","domainLabel":"Formation complémentaire","subId":"MPE2.1","subTitle":"Usiner des pièces sur machines-outils à commande numérique selon instructions (c.2)","text":"Piloter des machines CNC équipées et garantir la qualité des pièces usinées","id":"r72"},{"domain":"compl","domainLabel":"Formation complémentaire","subId":"MPE2.1","subTitle":"Usiner des pièces sur machines-outils à commande numérique selon instructions (c.2)","text":"Procéder selon instructions à des modifications de programme (valeurs de coupe, avances)","id":"r73"},{"domain":"compl","domainLabel":"Formation complémentaire","subId":"MPE2.1","subTitle":"Usiner des pièces sur machines-outils à commande numérique selon instructions (c.2)","text":"Mesurer les outils et introduire les valeurs de correction dans la mémoire de correction d'outils","id":"r74"},{"domain":"compl","domainLabel":"Formation complémentaire","subId":"MPE2.1","subTitle":"Usiner des pièces sur machines-outils à commande numérique selon instructions (c.2)","text":"Procéder au changement d'outils","id":"r75"},{"domain":"approf","domainLabel":"Formation approfondie — a.1 Tournage","subId":"a.1","subTitle":"Plan d'action — Usiner des pièces sur tours conventionnels","text":"Respecter les prescriptions relatives à la sécurité au travail, à la protection de la santé et de l'environnement","id":"r76"},{"domain":"approf","domainLabel":"Formation approfondie — a.1 Tournage","subId":"a.1","subTitle":"Plan d'action — Usiner des pièces sur tours conventionnels","text":"Appliquer les aspects écologiques","id":"r77"},{"domain":"approf","domainLabel":"Formation approfondie — a.1 Tournage","subId":"a.1","subTitle":"Plan d'action — Usiner des pièces sur tours conventionnels","text":"Comprendre le mandat et les spécifications du client","id":"r78"},{"domain":"approf","domainLabel":"Formation approfondie — a.1 Tournage","subId":"a.1","subTitle":"Plan d'action — Usiner des pièces sur tours conventionnels","text":"Choisir et préparer l'outillage","id":"r79"},{"domain":"approf","domainLabel":"Formation approfondie — a.1 Tournage","subId":"a.1","subTitle":"Plan d'action — Usiner des pièces sur tours conventionnels","text":"Préparer la machine en vue de son utilisation","id":"r80"},{"domain":"approf","domainLabel":"Formation approfondie — a.1 Tournage","subId":"a.1","subTitle":"Plan d'action — Usiner des pièces sur tours conventionnels","text":"Régler les données technologiques pour l'usinage par enlèvement de matière selon instructions","id":"r81"},{"domain":"approf","domainLabel":"Formation approfondie — a.1 Tournage","subId":"a.1","subTitle":"Plan d'action — Usiner des pièces sur tours conventionnels","text":"Fixer les pièces à usiner et monter les outils","id":"r82"},{"domain":"approf","domainLabel":"Formation approfondie — a.1 Tournage","subId":"a.1","subTitle":"Plan d'action — Usiner des pièces sur tours conventionnels","text":"Tourner extérieur et intérieur les pièces","id":"r83"},{"domain":"approf","domainLabel":"Formation approfondie — a.1 Tournage","subId":"a.1","subTitle":"Plan d'action — Usiner des pièces sur tours conventionnels","text":"Utiliser des tours","id":"r84"},{"domain":"approf","domainLabel":"Formation approfondie — a.1 Tournage","subId":"a.1","subTitle":"Plan d'action — Usiner des pièces sur tours conventionnels","text":"Contrôler la qualité des pièces usinées et la documenter","id":"r85"},{"domain":"approf","domainLabel":"Formation approfondie — a.1 Tournage","subId":"a.1","subTitle":"Plan d'action — Usiner des pièces sur tours conventionnels","text":"Remplir les documents de travail","id":"r86"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement (MPF1 — 80 périodes)","text":"Rechercher et expliquer les prescriptions y relatives","id":"r87"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement (MPF1 — 80 périodes)","text":"Connaître les symboles de mise en garde et expliquer leur signification","id":"r88"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.1","subTitle":"Sécurité au travail, protection de la santé, protection de l'environnement (MPF1 — 80 périodes)","text":"Expliquer l'application des prescriptions à l'aide d'exemples","id":"r89"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.2","subTitle":"Calculs de base","text":"Effectuer les opérations de base avec une calculatrice","id":"r90"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.2","subTitle":"Calculs de base","text":"Lire et interpréter des valeurs dans des formulaires","id":"r91"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.2","subTitle":"Calculs de base","text":"Effectuer des calculs simples selon dessins, nomenclatures, ordres de préparation","id":"r92"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.2","subTitle":"Calculs de base","text":"Effectuer des calculs avec des unités de temps","id":"r93"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.2","subTitle":"Calculs de base","text":"Expliquer la notion de pour cent","id":"r94"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.3","subTitle":"Notions fondamentales de physique","text":"Différencier les unités de mesure et les appliquer dans sa profession","id":"r95"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.3","subTitle":"Notions fondamentales de physique","text":"Résoudre des exemples de calculs simples de mouvements uniformes","id":"r96"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.3","subTitle":"Notions fondamentales de physique","text":"Différencier masse et force, attribuer leurs unités de mesure","id":"r97"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.3","subTitle":"Notions fondamentales de physique","text":"Appliquer la loi des leviers sur des exemples tirés de la profession","id":"r98"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.3","subTitle":"Notions fondamentales de physique","text":"Définir la température comme grandeur physique","id":"r99"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.3","subTitle":"Notions fondamentales de physique","text":"Expliquer les relations de la dilatation thermique","id":"r100"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.4","subTitle":"Moyens de mesure et de contrôle","text":"Désigner les pieds à coulisse et les calibres limites et expliquer leur utilisation","id":"r101"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF1.4","subTitle":"Moyens de mesure et de contrôle","text":"Lire des valeurs avec le principe du vernier","id":"r102"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.1","subTitle":"Introduction à la technique de dessin (MPF2 — 80 périodes)","text":"Différencier les types de représentation d'informations techniques","id":"r103"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.1","subTitle":"Introduction à la technique de dessin (MPF2 — 80 périodes)","text":"Différencier la nature des traits et leur signification","id":"r104"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.1","subTitle":"Introduction à la technique de dessin (MPF2 — 80 périodes)","text":"Expliquer les échelles utilisées dans les dessins","id":"r105"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.1","subTitle":"Introduction à la technique de dessin (MPF2 — 80 périodes)","text":"Lire les informations contenues dans un cartouche","id":"r106"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.1","subTitle":"Introduction à la technique de dessin (MPF2 — 80 périodes)","text":"Expliquer l'importance des normes","id":"r107"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.1","subTitle":"Introduction à la technique de dessin (MPF2 — 80 périodes)","text":"Interpréter des informations contenues dans les nomenclatures","id":"r108"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.2","subTitle":"Perspectives, projections","text":"Lire et dessiner les projections normales à partir de représentations en perspective","id":"r109"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.2","subTitle":"Perspectives, projections","text":"Lire et dessiner la forme dans l'espace à partir de vues normales simples","id":"r110"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.3","subTitle":"Coupes","text":"Lire et dessiner à partir des dessins remis la coupe, demi-coupe et coupe locale","id":"r111"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.4","subTitle":"Cotation","text":"Interpréter cotes en série, cotes parallèles, cotation de divisions, chanfreins, fraisures, filetages","id":"r112"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.5","subTitle":"Tolérances","text":"Interpréter tolérances générales, cotes avec tolérances et classes ISO","id":"r113"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.5","subTitle":"Tolérances","text":"Interpréter indications de rectitude, planéité, circularité, perpendicularité et symétrie","id":"r114"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.6","subTitle":"Etats de surface","text":"Interpréter les symboles d'état de surface","id":"r115"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.6","subTitle":"Etats de surface","text":"Interpréter les indications sur le procédé d'usinage","id":"r116"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.7","subTitle":"Lecture de dessin","text":"Reconnaître dans les dessins techniques les pièces de détail et les interpréter","id":"r117"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF2.7","subTitle":"Lecture de dessin","text":"Reconnaître la fonction d'éléments de construction et de sous-ensembles","id":"r118"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.1","subTitle":"Matériaux (MPF3 — 80 périodes)","text":"Différencier les types de matériaux","id":"r119"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.1","subTitle":"Matériaux (MPF3 — 80 périodes)","text":"Différencier métaux ferreux et non ferreux d'après leurs propriétés","id":"r120"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.1","subTitle":"Matériaux (MPF3 — 80 périodes)","text":"Décrire les possibilités d'usinage des métaux ferreux et non ferreux","id":"r121"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.1","subTitle":"Matériaux (MPF3 — 80 périodes)","text":"Décrire l'utilisation de métaux en tenant compte des aspects écologiques","id":"r122"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.1","subTitle":"Matériaux (MPF3 — 80 périodes)","text":"Décrire le traitement thermique des métaux (aspects écologiques)","id":"r123"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.2","subTitle":"Liquides de refroidissement et lubrifiants","text":"Différencier les liquides de refroidissement et lubrifiants, expliquer leur but","id":"r124"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.2","subTitle":"Liquides de refroidissement et lubrifiants","text":"Décrire les caractéristiques d'une utilisation correcte et écologique","id":"r125"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.3","subTitle":"Protection contre la corrosion","text":"Décrire les causes de la corrosion et leurs conséquences","id":"r126"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.3","subTitle":"Protection contre la corrosion","text":"Enumérer des types de traitement de surface","id":"r127"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.3","subTitle":"Protection contre la corrosion","text":"Enumérer des moyens de protection contre la corrosion","id":"r128"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.4","subTitle":"Protection de l'environnement","text":"Décrire les risques de pollution dans l'environnement professionnel","id":"r129"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.4","subTitle":"Protection de l'environnement","text":"Décrire une élimination sans nuisances pour l'environnement","id":"r130"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.4","subTitle":"Protection de l'environnement","text":"Différencier les symboles de mise en garde","id":"r131"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.5","subTitle":"Technique d'usinage","text":"Différencier le perçage, tournage, fraisage et meulage","id":"r132"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.5","subTitle":"Technique d'usinage","text":"Citer vitesse de coupe, profondeur de coupe, géométrie de tranchant","id":"r133"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.5","subTitle":"Technique d'usinage","text":"Expliquer paramètres simples des machines-outils","id":"r134"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.5","subTitle":"Technique d'usinage","text":"Calculer des vitesses de coupe et de rotation (tournage, fraisage)","id":"r135"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.6","subTitle":"Technique d'assemblage","text":"Décrire les principaux types d'assemblages amovibles et leur application","id":"r136"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF3.6","subTitle":"Technique d'assemblage","text":"Décrire les principaux types d'assemblages non amovibles et leur application","id":"r137"},{"domain":"ecole","domainLabel":"École professionnelle","subId":"MPF4.1","subTitle":"Atelier d'apprentissage (MPF4 — 160 périodes)","text":"Appui aux devoirs, encouragement individuel, coaching","id":"r138"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM1","subTitle":"Approche et action économiques","text":"Effectuer les travaux de façon économique et performante, en respectant les consignes (Efficacité)","id":"r139"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM1","subTitle":"Approche et action économiques","text":"Connaître et appliquer les principes de qualité (Qualité)","id":"r140"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM1","subTitle":"Approche et action économiques","text":"Connaître l'organisation et les processus internes de l'entreprise (Organisation)","id":"r141"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM1","subTitle":"Approche et action économiques","text":"Participer à l'élaboration et à l'optimisation des processus de travail (Processus de travail)","id":"r142"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM2","subTitle":"Travail systématique (méthode en 6 étapes)","text":"Comprendre les informations","id":"r143"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM2","subTitle":"Travail systématique (méthode en 6 étapes)","text":"Traiter le mandat","id":"r144"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM2","subTitle":"Travail systématique (méthode en 6 étapes)","text":"Réaliser les travaux selon le planning établi","id":"r145"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM2","subTitle":"Travail systématique (méthode en 6 étapes)","text":"Contrôler et documenter les travaux réalisés de façon autonome","id":"r146"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM2","subTitle":"Travail systématique (méthode en 6 étapes)","text":"Evaluer l'exécution du travail et le résultat","id":"r147"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM3","subTitle":"Communication et présentation","text":"Communiquer avec un esprit d'ouverture, de manière objective et compréhensible","id":"r148"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM3","subTitle":"Communication et présentation","text":"Créer des documents et des documentations de manière appropriée","id":"r149"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPM3","subTitle":"Communication et présentation","text":"Utiliser de manière appropriée les outils de présentation","id":"r150"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R1","subTitle":"Aptitude au travail en équipe, capacité à gérer des conflits","text":"Collaborer et rechercher des solutions avec d'autres professionnels","id":"r151"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R1","subTitle":"Aptitude au travail en équipe, capacité à gérer des conflits","text":"Accepter les décisions prises et les appliquer","id":"r152"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R1","subTitle":"Aptitude au travail en équipe, capacité à gérer des conflits","text":"Mener un entretien avec des collaborateurs et supérieurs hiérarchiques","id":"r153"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R1","subTitle":"Aptitude au travail en équipe, capacité à gérer des conflits","text":"Accepter les situations conflictuelles et réagir de manière calme et réfléchie","id":"r154"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R2","subTitle":"Faculté d'apprendre, aptitude aux changements","text":"Acquérir seul ou en équipe de nouvelles aptitudes et connaissances","id":"r155"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R2","subTitle":"Faculté d'apprendre, aptitude aux changements","text":"Se créer de bonnes conditions d'apprentissage","id":"r156"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R2","subTitle":"Faculté d'apprendre, aptitude aux changements","text":"Utiliser efficacement les techniques d'apprentissage","id":"r157"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R2","subTitle":"Faculté d'apprendre, aptitude aux changements","text":"Se préparer à un apprentissage autonome tout au long de la vie","id":"r158"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R2","subTitle":"Faculté d'apprendre, aptitude aux changements","text":"Accepter des changements et mettre en œuvre des innovations","id":"r159"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R3","subTitle":"Civilité","text":"Adopter un comportement professionnel avec les personnes de l'environnement de travail","id":"r160"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R3","subTitle":"Civilité","text":"Respecter les règles de civilité","id":"r161"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R3","subTitle":"Civilité","text":"Être ponctuel, ordonné et consciencieux","id":"r162"},{"domain":"ms","domainLabel":"Ressources méthodo. et sociales","subId":"MPS-R3","subTitle":"Civilité","text":"Faire preuve de courtoisie, de respect et de compréhension envers toute personne quelle que soit sa culture","id":"r163"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.1","subTitle":"L'individu face au danger","text":"Décrire les causes et les conséquences d'un comportement à risque","id":"r164"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.1","subTitle":"L'individu face au danger","text":"Décrire les mesures de prévention des accidents et des maladies","id":"r165"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.1","subTitle":"L'individu face au danger","text":"Expliquer les droits et obligations en matière de sécurité/santé/environnement","id":"r166"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.1","subTitle":"L'individu face au danger","text":"Décrire les gestes de premiers secours en cas d'accident","id":"r167"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.2","subTitle":"Plan d'urgence de l'entreprise","text":"Citer les gestes de premiers secours dans une situation d'urgence","id":"r168"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.2","subTitle":"Plan d'urgence de l'entreprise","text":"Décrire les moyens d'extinction appropriés","id":"r169"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.3","subTitle":"Dispositifs de sécurité et équipements de protection","text":"Décrire les dangers sur le lieu de travail","id":"r170"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.3","subTitle":"Dispositifs de sécurité et équipements de protection","text":"Décrire la signification des signaux de sécurité","id":"r171"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.3","subTitle":"Dispositifs de sécurité et équipements de protection","text":"Utiliser correctement les dispositifs de sécurité","id":"r172"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.3","subTitle":"Dispositifs de sécurité et équipements de protection","text":"Utiliser correctement l'équipement de protection individuelle","id":"r173"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.4","subTitle":"Maintenance","text":"Citer les règles de sécurité applicables aux travaux d'entretien et de réparation","id":"r174"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.4","subTitle":"Maintenance","text":"Appliquer le plan de maintenance","id":"r175"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.5","subTitle":"Transport et voies de communication","text":"Décrire les dangers inhérents au déplacement de charges","id":"r176"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.5","subTitle":"Transport et voies de communication","text":"Utiliser correctement les moyens auxiliaires lors d'un déplacement de charges","id":"r177"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.5","subTitle":"Transport et voies de communication","text":"Appliquer correctement les mesures de protection personnelles","id":"r178"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.5","subTitle":"Transport et voies de communication","text":"Décrire et éliminer les obstacles et les endroits où l'on risque de trébucher","id":"r179"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.5","subTitle":"Transport et voies de communication","text":"Utiliser correctement les échelles et accessoires de montée","id":"r180"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.6","subTitle":"Agencement des postes de travail et bien-être","text":"Citer les facteurs pathogènes au poste de travail","id":"r181"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.6","subTitle":"Agencement des postes de travail et bien-être","text":"Aménager un poste de travail et des processus de travail ergonomiques","id":"r182"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.6","subTitle":"Agencement des postes de travail et bien-être","text":"Organiser le travail de manière fonctionnelle","id":"r183"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.7","subTitle":"Sécurité durant les loisirs","text":"Décrire un comportement sûr et conscient des risques encourus durant les loisirs","id":"r184"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.8","subTitle":"Produits toxiques","text":"Comprendre les symboles de danger des produits toxiques","id":"r185"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.8","subTitle":"Produits toxiques","text":"Comprendre les fiches de sécurité et les étiquettes des produits chimiques","id":"r186"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.8","subTitle":"Produits toxiques","text":"Connaître les risques inhérents à la manipulation de produits chimiques toxiques","id":"r187"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.8","subTitle":"Produits toxiques","text":"Connaître et mettre en œuvre les mesures de sécurité relatives à ces produits","id":"r188"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.8","subTitle":"Produits toxiques","text":"Utiliser les produits toxiques de manière appropriée","id":"r189"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.9","subTitle":"Mesures de protection","text":"Respecter les mesures de protection contre le risque d'incendie et d'explosion","id":"r190"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA1.9","subTitle":"Mesures de protection","text":"Respecter les mesures de protection contre le bruit","id":"r191"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA2.1","subTitle":"Gestion des ressources (protection environnement / efficience)","text":"Décrire une utilisation appropriée et respectueuse de l'environnement des ressources renouvelables et non renouvelables","id":"r192"},{"domain":"secu","domainLabel":"Sécurité / santé / environnement","subId":"MPA2.1","subTitle":"Gestion des ressources (protection environnement / efficience)","text":"Eliminer les déchets dans les règles de l'art et en tenant compte des aspects écologiques","id":"r193"}];
+
+/* ====== CONFIGURATION FIREBASE ======
+   Remplacez les valeurs ci-dessous par celles de VOTRE projet Firebase.
+   Voir le guide fourni pour créer un projet Firebase gratuit en 10 minutes.
+*/
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyABC123...",
+  authDomain: "suivi-formation-afp.firebaseapp.com",
+  databaseURL: "https://suivi-formation-afp-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "suivi-formation-afp"
+};
+
+let db = null;
+let firebaseReady = false;
+try {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.database();
+  firebaseReady = true;
+} catch (e) {
+  console.error("Firebase init error:", e);
+}
+
+const DOMAIN_ORDER = ["base","cie","compl","approf","ecole","ms","secu"];
+
+const STATUS_LABELS = {
+  todo: "À commencer",
+  progress: "En cours",
+  done_self: "Marqué acquis (en attente de validation)",
+  validated: "Validé par le formateur",
+  rejected: "À revoir"
+};
+
+const root = document.getElementById('app-root');
+
+function uid(){ return 'a' + Math.random().toString(36).slice(2,9); }
+
+function emptyProgressFor(){
+  const progress = {};
+  RESOURCES.forEach(r => { progress[r.id] = { status: 'todo', note: '', trainerNote: '', updatedAt: null }; });
+  return progress;
+}
+
+/* ====== ETAT ET PERSISTANCE ====== */
+let STATE = { apprentices: [], trainerCode: "" };
+let SESSION = null;
+let LOADING = true;
+let TRAINER_SELECTED_ID = null;
+let TRAINER_VIEW = null;
+
+function loadState(callback){
+  if (!firebaseReady){
+    LOADING = false;
+    callback();
+    return;
+  }
+  db.ref('mp-afp-state').once('value').then(snap => {
+    const val = snap.val();
+    if (val) {
+      STATE = val;
+      if (!STATE.apprentices) STATE.apprentices = [];
+    }
+    LOADING = false;
+    callback();
+  }).catch(e => {
+    console.error('load error', e);
+    LOADING = false;
+    callback();
+  });
+
+  // Ecoute en temps réel des changements (autres utilisateurs)
+  db.ref('mp-afp-state').on('value', snap => {
+    const val = snap.val();
+    if (val) {
+      STATE = val;
+      if (!STATE.apprentices) STATE.apprentices = [];
+      if (!LOADING) render();
+    }
+  });
+}
+
+function saveState(){
+  if (!firebaseReady) {
+    alert("Connexion à la base de données indisponible. Vérifiez la configuration Firebase (voir le guide).");
+    return Promise.resolve();
+  }
+  return db.ref('mp-afp-state').set(STATE).catch(e => {
+    console.error('save error', e);
+    alert("Erreur lors de l'enregistrement. Vérifiez votre connexion internet.");
+  });
+}
+
+function getApprentice(id){ return STATE.apprentices.find(a => a.id === id); }
+
+/* ====== HELPERS UI ====== */
+function el(tag, attrs, children){
+  const e = document.createElement(tag);
+  attrs = attrs || {};
+  Object.keys(attrs).forEach(k => {
+    if (k === 'style') e.style.cssText = attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else e.setAttribute(k, attrs[k]);
+  });
+  (children||[]).forEach(c => {
+    if (typeof c === 'string') e.appendChild(document.createTextNode(c));
+    else if (c) e.appendChild(c);
+  });
+  return e;
+}
+
+function card(children, extraStyle){
+  const c = el('div', {class:'card', style: extraStyle||''}, children);
+  return c;
+}
+
+function button(label, onClick, variant){
+  const b = el('button', { onclick: onClick }, [label]);
+  if (variant === 'primary') b.classList.add('primary');
+  return b;
+}
+
+function badge(text, bg, color){
+  return el('span', {class:'badge', style:'background:'+bg+';color:'+color+';'}, [text]);
+}
+
+/* ====== RENDU PRINCIPAL ====== */
+function render(){
+  root.innerHTML = '';
+  if (LOADING){
+    root.appendChild(el('div', {style:'padding:2rem;text-align:center;color:var(--text-secondary);font-size:14px;'}, ['Chargement…']));
+    return;
+  }
+  if (!firebaseReady){
+    root.appendChild(card([
+      el('h3', {style:'margin-bottom:8px;'}, ['Configuration requise']),
+      el('p', {style:'font-size:14px;color:var(--text-secondary);'}, ['La connexion à la base de données Firebase n\'est pas configurée. Modifiez les valeurs FIREBASE_CONFIG en haut du fichier HTML avec les identifiants de votre projet Firebase. Voir le guide fourni.'])
+    ]));
+    return;
+  }
+  if (!SESSION){ renderLogin(); }
+  else if (SESSION.role === 'trainer'){ renderTrainerDashboard(); }
+  else { renderApprenticeView(); }
+}
+
+function renderLogin(){
+  const wrap = el('div', {style:'max-width:420px;margin:0 auto;padding:1rem 0;'});
+  wrap.appendChild(el('h1', {style:'text-align:center;margin-bottom:4px;'}, ['Suivi de formation']));
+  wrap.appendChild(el('p', {style:'text-align:center;color:var(--text-secondary);font-size:14px;margin-bottom:1.5rem;'}, ['Praticien-ne en mécanique AFP']));
+
+  const tabBar = el('div', {style:'display:flex;gap:8px;margin-bottom:1.25rem;'});
+  const content = el('div', {});
+
+  function renderApprenticeLogin(){
+    content.innerHTML = '';
+    const list = STATE.apprentices || [];
+    const selectWrap = el('div', {style:'margin-bottom:1rem;'});
+    let sel = null;
+    if (list.length === 0){
+      selectWrap.appendChild(el('p', {style:'font-size:13px;color:var(--text-secondary);'}, ['Aucun apprenti enregistré encore. Demandez à votre formateur de créer votre profil.']));
+    } else {
+      selectWrap.appendChild(el('label', {style:'font-size:13px;color:var(--text-secondary);display:block;margin-bottom:6px;'}, ['Choisissez votre nom']));
+      sel = el('select', {id:'appr-select'});
+      sel.appendChild(el('option', {value:''}, ['— Sélectionner —']));
+      list.forEach(a => sel.appendChild(el('option', {value:a.id}, [a.name])));
+      selectWrap.appendChild(sel);
+    }
+    content.appendChild(selectWrap);
+
+    const codeWrap = el('div', {style:'margin-bottom:1rem;'});
+    codeWrap.appendChild(el('label', {style:'font-size:13px;color:var(--text-secondary);display:block;margin-bottom:6px;'}, ['Votre code personnel']));
+    const codeInput = el('input', {type:'password', id:'appr-code', placeholder:'Code à 4 chiffres'});
+    codeWrap.appendChild(codeInput);
+    content.appendChild(codeWrap);
+
+    const errBox = el('p', {style:'font-size:13px;color:var(--danger-text);min-height:18px;'}, ['']);
+    content.appendChild(errBox);
+
+    content.appendChild(button('Se connecter', () => {
+      const id = sel ? sel.value : null;
+      const code = document.getElementById('appr-code').value.trim();
+      const appr = list.find(a => a.id === id);
+      if (!appr){ errBox.textContent = 'Sélectionnez votre nom.'; return; }
+      if (appr.code !== code){ errBox.textContent = 'Code incorrect.'; return; }
+      SESSION = { role: 'apprentice', apprenticeId: appr.id };
+      render();
+    }, 'primary'));
+  }
+
+  function renderTrainerLogin(){
+    content.innerHTML = '';
+    const codeWrap = el('div', {style:'margin-bottom:1rem;'});
+    codeWrap.appendChild(el('label', {style:'font-size:13px;color:var(--text-secondary);display:block;margin-bottom:6px;'}, ['Code formateur']));
+    const codeInput = el('input', {type:'password', id:'trainer-code', placeholder:'Code formateur'});
+    codeWrap.appendChild(codeInput);
+    content.appendChild(codeWrap);
+    const errBox = el('p', {style:'font-size:13px;color:var(--danger-text);min-height:18px;'}, ['']);
+    content.appendChild(errBox);
+    content.appendChild(button('Accéder au tableau de bord formateur', () => {
+      const code = document.getElementById('trainer-code').value.trim();
+      const expected = STATE.trainerCode || '0000';
+      if (code !== expected){ errBox.textContent = 'Code incorrect.'; return; }
+      SESSION = { role: 'trainer' };
+      render();
+    }, 'primary'));
+    content.appendChild(el('p', {style:'font-size:12px;color:var(--text-tertiary);margin-top:1rem;'}, [
+      STATE.trainerCode ? 'Code formateur configuré.' : 'Premier accès : code par défaut 0000. Changez-le ensuite dans Paramètres.'
+    ]));
+  }
+
+  const tabBtnA = button('Je suis apprenti-e', () => setMode('apprentice'));
+  const tabBtnT = button('Je suis formateur', () => setMode('trainer'));
+  tabBtnA.style.flex = '1';
+  tabBtnT.style.flex = '1';
+  tabBar.appendChild(tabBtnA);
+  tabBar.appendChild(tabBtnT);
+
+  function setMode(m){
+    if (m === 'apprentice') {
+      renderApprenticeLogin();
+      tabBtnA.classList.add('primary'); tabBtnT.classList.remove('primary');
+    } else {
+      renderTrainerLogin();
+      tabBtnT.classList.add('primary'); tabBtnA.classList.remove('primary');
+    }
+  }
+
+  wrap.appendChild(tabBar);
+  wrap.appendChild(card([content]));
+  root.appendChild(wrap);
+  setMode('apprentice');
+}
+
+function progressSummary(appr){
+  const total = RESOURCES.length;
+  const validated = RESOURCES.filter(r => appr.progress[r.id] && appr.progress[r.id].status === 'validated').length;
+  const pending = RESOURCES.filter(r => appr.progress[r.id] && appr.progress[r.id].status === 'done_self').length;
+  const inProgress = RESOURCES.filter(r => appr.progress[r.id] && appr.progress[r.id].status === 'progress').length;
+  const pct = Math.round((validated/total)*100);
+
+  return card([
+    el('div', {style:'display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;'}, [
+      el('span', {style:'font-size:13px;color:var(--text-secondary);'}, ['Compétences validées par le formateur']),
+      el('span', {style:'font-size:20px;font-weight:500;'}, [pct + '%'])
+    ]),
+    el('div', {style:'height:8px;background:var(--bg);border-radius:99px;overflow:hidden;margin-bottom:12px;border:0.5px solid var(--border);'}, [
+      el('div', {style:'height:100%;width:' + pct + '%;background:#3b6d11;border-radius:99px;'})
+    ]),
+    el('div', {style:'display:grid;grid-template-columns:repeat(4,1fr);gap:8px;'}, [
+      miniStat(total, 'Total'), miniStat(validated, 'Validées'), miniStat(pending, 'En attente'), miniStat(inProgress, 'En cours'),
+    ])
+  ]);
+}
+
+function miniStat(num, label){
+  return el('div', {style:'background:var(--bg);border-radius:var(--radius-md);padding:10px;text-align:center;border:0.5px solid var(--border);'}, [
+    el('div', {style:'font-size:18px;font-weight:500;'}, [String(num)]),
+    el('div', {style:'font-size:11px;color:var(--text-secondary);'}, [label])
+  ]);
+}
+
+function statusColor(status){
+  return {
+    todo: {bg:'var(--bg)', text:'var(--text-secondary)'},
+    progress: {bg:'var(--warning-bg)', text:'var(--warning-text)'},
+    done_self: {bg:'var(--warning-bg)', text:'var(--warning-text)'},
+    validated: {bg:'var(--success-bg)', text:'var(--success-text)'},
+    rejected: {bg:'var(--danger-bg)', text:'var(--danger-text)'}
+  }[status];
+}
+
+function renderApprenticeView(){
+  const appr = getApprentice(SESSION.apprenticeId);
+  if (!appr){ SESSION = null; render(); return; }
+
+  const wrap = el('div', {});
+  const header = el('div', {style:'display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px;'});
+  header.appendChild(el('div', {}, [
+    el('h2', {}, [appr.name]),
+    el('p', {style:'margin:2px 0 0;font-size:13px;color:var(--text-secondary);'}, ['Mon suivi de progression'])
+  ]));
+  header.appendChild(button('Se déconnecter', () => { SESSION = null; render(); }));
+  wrap.appendChild(header);
+
+  wrap.appendChild(progressSummary(appr));
+
+  const filterBar = el('div', {style:'display:flex;gap:8px;margin:1.25rem 0 1rem;flex-wrap:wrap;'});
+  let activeDomain = 'all';
+  const domainBtns = {};
+  function setDomain(d){
+    activeDomain = d;
+    Object.keys(domainBtns).forEach(k => {
+      if (k===d) domainBtns[k].classList.add('primary'); else domainBtns[k].classList.remove('primary');
+    });
+    renderList();
+  }
+  const allBtn = button('Tout', () => setDomain('all'));
+  domainBtns['all'] = allBtn;
+  filterBar.appendChild(allBtn);
+  DOMAIN_ORDER.forEach(d => {
+    const found = RESOURCES.find(r => r.domain===d);
+    if (!found) return;
+    const b = button(found.domainLabel, () => setDomain(d));
+    domainBtns[d] = b;
+    filterBar.appendChild(b);
+  });
+  wrap.appendChild(filterBar);
+
+  const listWrap = el('div', {id:'res-list', style:'display:flex;flex-direction:column;gap:8px;'});
+  wrap.appendChild(listWrap);
+
+  function renderList(){
+    listWrap.innerHTML = '';
+    const items = RESOURCES.filter(r => activeDomain==='all' || r.domain===activeDomain);
+    let lastSub = null;
+    items.forEach(r => {
+      if (r.subId !== lastSub){
+        listWrap.appendChild(el('div', {style:'font-size:13px;font-weight:500;color:var(--text-secondary);margin:8px 0 0;'}, [r.subId + ' — ' + r.subTitle]));
+        lastSub = r.subId;
+      }
+      listWrap.appendChild(resourceRow(appr, r));
+    });
+  }
+  renderList();
+  root.appendChild(wrap);
+}
+
+function resourceRow(appr, r){
+  if (!appr.progress[r.id]) appr.progress[r.id] = {status:'todo', note:'', trainerNote:'', updatedAt:null};
+  const p = appr.progress[r.id];
+  const sc = statusColor(p.status);
+  const row = el('div', {style:'border:0.5px solid var(--border);border-radius:var(--radius-md);padding:10px 12px;'});
+
+  const top = el('div', {style:'display:flex;justify-content:space-between;align-items:flex-start;gap:10px;'});
+  top.appendChild(el('p', {style:'font-size:14px;flex:1;'}, [r.text]));
+  top.appendChild(badge(STATUS_LABELS[p.status], sc.bg, sc.text));
+  row.appendChild(top);
+
+  if (p.trainerNote){
+    row.appendChild(el('p', {style:'font-size:12px;color:var(--info-text);margin-top:6px;'}, ['Retour du formateur : ' + p.trainerNote]));
+  }
+
+  const controls = el('div', {style:'display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;'});
+  const opts = [['todo','À commencer'], ['progress','En cours'], ['done_self','Je la considère acquise']];
+  opts.forEach(function(pair){
+    const val = pair[0], label = pair[1];
+    const b = button(label, () => {
+      if (p.status === 'validated' || p.status === 'rejected'){
+        if (!confirm('Cette ressource a déjà été évaluée par le formateur. Continuer ?')) return;
+      }
+      p.status = val;
+      p.updatedAt = new Date().toISOString();
+      saveState().then(() => renderApprenticeView());
+    });
+    if (p.status === val) b.classList.add('primary');
+    controls.appendChild(b);
+  });
+  row.appendChild(controls);
+  return row;
+}
+
+function renderTrainerDashboard(){
+  const wrap = el('div', {});
+  const header = el('div', {style:'display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px;'});
+  header.appendChild(el('div', {}, [
+    el('h2', {}, ['Tableau de bord formateur']),
+    el('p', {style:'margin:2px 0 0;font-size:13px;color:var(--text-secondary);'}, [(STATE.apprentices||[]).length + ' apprenti(s) suivi(s)'])
+  ]));
+  const headerBtns = el('div', {style:'display:flex;gap:8px;'});
+  headerBtns.appendChild(button('Paramètres', () => { TRAINER_VIEW = 'settings'; renderTrainerDashboard(); }));
+  headerBtns.appendChild(button('Se déconnecter', () => { SESSION = null; render(); }));
+  header.appendChild(headerBtns);
+  wrap.appendChild(header);
+
+  if (TRAINER_VIEW === 'settings'){
+    wrap.appendChild(renderSettingsPanel());
+    root.innerHTML = ''; root.appendChild(wrap); return;
+  }
+  if (TRAINER_SELECTED_ID){
+    wrap.appendChild(renderApprenticeDetailForTrainer(TRAINER_SELECTED_ID));
+    root.innerHTML = ''; root.appendChild(wrap); return;
+  }
+
+  const addBar = el('div', {style:'display:flex;gap:8px;margin-bottom:1rem;'});
+  const nameInput = el('input', {type:'text', placeholder:'Nom du nouvel apprenti', id:'new-appr-name', style:'flex:1;'});
+  addBar.appendChild(nameInput);
+  addBar.appendChild(button('Ajouter un apprenti', () => {
+    const name = nameInput.value.trim();
+    if (!name) return;
+    const code = String(Math.floor(1000 + Math.random()*9000));
+    const newAppr = { id: uid(), name: name, code: code, progress: emptyProgressFor() };
+    if (!STATE.apprentices) STATE.apprentices = [];
+    STATE.apprentices.push(newAppr);
+    saveState().then(() => {
+      alert('Apprenti ajouté : ' + name + '\n Code personnel : ' + code + '\n\nCommuniquez ce code à l\'apprenti-e.');
+      renderTrainerDashboard();
+    });
+  }, 'primary'));
+  wrap.appendChild(addBar);
+
+  const apprentices = STATE.apprentices || [];
+  if (apprentices.length === 0){
+    wrap.appendChild(card([el('p', {style:'font-size:14px;color:var(--text-secondary);'}, ['Aucun apprenti enregistré. Ajoutez-en un ci-dessus pour commencer.'])]));
+  } else {
+    const grid = el('div', {style:'display:flex;flex-direction:column;gap:8px;'});
+    apprentices.forEach(a => {
+      const total = RESOURCES.length;
+      const validated = RESOURCES.filter(r => a.progress[r.id] && a.progress[r.id].status === 'validated').length;
+      const pendingReview = RESOURCES.filter(r => a.progress[r.id] && a.progress[r.id].status === 'done_self').length;
+      const pct = Math.round((validated/total)*100);
+      const rowChildren = [
+        el('div', {style:'flex:1;'}, [
+          el('p', {style:'font-weight:500;font-size:15px;'}, [a.name]),
+          el('p', {style:'font-size:12px;color:var(--text-secondary);margin-top:2px;'}, ['Code : ' + a.code + ' · ' + validated + '/' + total + ' validées' + (pendingReview>0?(' · ' + pendingReview + ' en attente'):'')])
+        ])
+      ];
+      if (pendingReview > 0){
+        rowChildren.push(badge(pendingReview + ' à valider', 'var(--warning-bg)', 'var(--warning-text)'));
+      }
+      rowChildren.push(el('span', {style:'font-size:18px;font-weight:500;min-width:48px;text-align:right;'}, [pct + '%']));
+      const row = card([
+        el('div', {style:'display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;', onclick: () => { TRAINER_SELECTED_ID = a.id; renderTrainerDashboard(); }}, rowChildren)
+      ]);
+      grid.appendChild(row);
+    });
+    wrap.appendChild(grid);
+  }
+  root.innerHTML = ''; root.appendChild(wrap);
+}
+
+function renderSettingsPanel(){
+  const wrap = el('div', {});
+  wrap.appendChild(button('← Retour', () => { TRAINER_VIEW = null; renderTrainerDashboard(); }));
+  const c = card([
+    el('h3', {style:'margin-bottom:8px;'}, ['Code formateur']),
+    el('p', {style:'font-size:13px;color:var(--text-secondary);margin-bottom:10px;'}, ['Changez le code utilisé pour accéder au tableau de bord formateur.']),
+    el('input', {type:'text', id:'new-trainer-code', placeholder:'Nouveau code', style:'margin-bottom:10px;'}),
+    button('Mettre à jour le code', () => {
+      const v = document.getElementById('new-trainer-code').value.trim();
+      if (!v) return;
+      STATE.trainerCode = v;
+      saveState().then(() => alert('Code formateur mis à jour.'));
+    }, 'primary')
+  ], 'margin-top:1rem;');
+  wrap.appendChild(c);
+
+  const apprRows = (STATE.apprentices||[]).map(a => el('div', {style:'display:flex;justify-content:space-between;align-items:center;padding:6px 0;'}, [
+    el('span', {style:'font-size:13px;'}, [a.name + ' (code ' + a.code + ')']),
+    button('Supprimer', () => {
+      if (!confirm('Supprimer définitivement ' + a.name + ' et toute sa progression ?')) return;
+      STATE.apprentices = STATE.apprentices.filter(x => x.id !== a.id);
+      saveState().then(() => renderTrainerDashboard());
+    })
+  ]));
+  const dangerCard = card([
+    el('h3', {style:'margin-bottom:8px;'}, ['Gestion des apprentis']),
+    el('div', {style:'display:flex;flex-direction:column;'}, apprRows)
+  ], 'margin-top:1rem;');
+  wrap.appendChild(dangerCard);
+  return wrap;
+}
+
+function renderApprenticeDetailForTrainer(apprId){
+  const appr = getApprentice(apprId);
+  const wrap = el('div', {});
+  wrap.appendChild(button('← Retour à la liste', () => { TRAINER_SELECTED_ID = null; renderTrainerDashboard(); }));
+
+  const headerRow = el('div', {style:'margin:1rem 0;'}, [
+    el('h3', {}, [appr.name]),
+    el('p', {style:'font-size:12px;color:var(--text-secondary);margin-top:2px;'}, ['Code personnel : ' + appr.code])
+  ]);
+  wrap.appendChild(headerRow);
+  wrap.appendChild(progressSummary(appr));
+
+  const filterBar = el('div', {style:'display:flex;gap:8px;margin:1.25rem 0 1rem;flex-wrap:wrap;'});
+  let activeFilter = 'review';
+  const filterBtns = {};
+  function setFilter(f){
+    activeFilter = f;
+    Object.keys(filterBtns).forEach(k => {
+      if (k===f) filterBtns[k].classList.add('primary'); else filterBtns[k].classList.remove('primary');
+    });
+    renderTrainerList();
+  }
+  const filters = [['review','À valider'], ['all','Tout voir'], ['validated','Validées'], ['rejected','À revoir']];
+  filters.forEach(function(pair){
+    const key = pair[0], label = pair[1];
+    const b = button(label, () => setFilter(key));
+    filterBtns[key] = b;
+    filterBar.appendChild(b);
+  });
+  wrap.appendChild(filterBar);
+
+  const listWrap = el('div', {style:'display:flex;flex-direction:column;gap:8px;'});
+  wrap.appendChild(listWrap);
+
+  function renderTrainerList(){
+    listWrap.innerHTML = '';
+    let items;
+    if (activeFilter === 'review') items = RESOURCES.filter(r => appr.progress[r.id] && appr.progress[r.id].status === 'done_self');
+    else if (activeFilter === 'validated') items = RESOURCES.filter(r => appr.progress[r.id] && appr.progress[r.id].status === 'validated');
+    else if (activeFilter === 'rejected') items = RESOURCES.filter(r => appr.progress[r.id] && appr.progress[r.id].status === 'rejected');
+    else items = RESOURCES;
+
+    if (items.length === 0){
+      listWrap.appendChild(card([el('p', {style:'font-size:13px;color:var(--text-secondary);'}, ['Rien à afficher dans cette catégorie.'])]));
+      return;
+    }
+    let lastSub = null;
+    items.forEach(r => {
+      if (r.subId !== lastSub){
+        listWrap.appendChild(el('div', {style:'font-size:13px;font-weight:500;color:var(--text-secondary);margin:8px 0 0;'}, [r.subId + ' — ' + r.subTitle]));
+        lastSub = r.subId;
+      }
+      listWrap.appendChild(trainerResourceRow(appr, r, renderTrainerList));
+    });
+  }
+  renderTrainerList();
+  return wrap;
+}
+
+function trainerResourceRow(appr, r, refresh){
+  if (!appr.progress[r.id]) appr.progress[r.id] = {status:'todo', note:'', trainerNote:'', updatedAt:null};
+  const p = appr.progress[r.id];
+  const sc = statusColor(p.status);
+  const row = el('div', {style:'border:0.5px solid var(--border);border-radius:var(--radius-md);padding:10px 12px;'});
+  const top = el('div', {style:'display:flex;justify-content:space-between;align-items:flex-start;gap:10px;'});
+  top.appendChild(el('p', {style:'font-size:14px;flex:1;'}, [r.text]));
+  top.appendChild(badge(STATUS_LABELS[p.status], sc.bg, sc.text));
+  row.appendChild(top);
+
+  const noteInput = el('input', {type:'text', placeholder:"Commentaire pour l'apprenti (optionnel)", value: p.trainerNote||'', style:'margin-top:8px;font-size:13px;'});
+  row.appendChild(noteInput);
+
+  const controls = el('div', {style:'display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;'});
+  controls.appendChild(el('button', {
+    style:'border-color:#97c459;background:var(--success-bg);color:var(--success-text);font-weight:500;font-size:12px;padding:5px 10px;',
+    onclick: () => { p.status = 'validated'; p.trainerNote = noteInput.value.trim(); saveState().then(refresh); }
+  }, ['Valider']));
+  controls.appendChild(el('button', {
+    style:'border-color:#f09595;background:var(--danger-bg);color:var(--danger-text);font-weight:500;font-size:12px;padding:5px 10px;',
+    onclick: () => { p.status = 'rejected'; p.trainerNote = noteInput.value.trim(); saveState().then(refresh); }
+  }, ['À revoir']));
+  controls.appendChild(el('button', {
+    style:'font-size:12px;padding:5px 10px;',
+    onclick: () => { p.trainerNote = noteInput.value.trim(); saveState().then(refresh); }
+  }, ['Enregistrer commentaire']));
+  row.appendChild(controls);
+  return row;
+}
+
+/* ====== INITIALISATION ====== */
+loadState(() => {
+  if (!STATE.apprentices) STATE.apprentices = [];
+  STATE.apprentices.forEach(a => {
+    if (!a.progress) a.progress = emptyProgressFor();
+    RESOURCES.forEach(r => { if (!a.progress[r.id]) a.progress[r.id] = {status:'todo', note:'', trainerNote:'', updatedAt:null}; });
+  });
+  render();
+});
+</script>
+</body>
+</html>
